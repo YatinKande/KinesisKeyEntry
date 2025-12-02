@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Door - Visitor Entry</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+            color: #1e293b;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -150px;
+            right: -150px;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 550px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.5s ease-out;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(15, 23, 42, 0.35);
+            color: #e5e7eb;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #f0f0f0;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 3px solid #e2e8f0;
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .photo-preview {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            display: none;
+            border: 3px solid #e2e8f0;
+        }
+        
+        .status-text {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .message {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #0284c7;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        label .required {
+            color: #ef4444;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: #94a3b8;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .redirect-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .redirect-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: bounce 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .redirect-container h2 {
+            font-size: 22px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .countdown-timer {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 20px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            padding: 20px 30px;
+            border-top: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+            text-align: center;
+            max-width: 60px;
+        }
+        
+        .step.active .step-label {
+            color: #667eea;
+        }
+        
+        /* DARK THEME OVERRIDES */
+        body.dark {
+            background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #020617 100%);
+            color: #e5e7eb;
+        }
+        
+        body.dark .container {
+            background: #020617;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        
+        body.dark .header {
+            background: linear-gradient(135deg, #020617 0%, #1f2937 100%);
+        }
+        
+        body.dark .footer {
+            border-color: #1f2937;
+            color: #64748b;
+        }
+        
+        body.dark input,
+        body.dark textarea {
+            background: #020617;
+            color: #e5e7eb;
+            border-color: #1f2937;
+        }
+        
+        body.dark input::placeholder,
+        body.dark textarea::placeholder {
+            color: #64748b;
+        }
+        
+        body.dark .camera-container {
+            background: #020617;
+            border-color: #1f2937;
+        }
+        
+        body.dark .photo-preview {
+            border-color: #1f2937;
+        }
+        
+        body.dark .message.info {
+            background: #0f172a;
+            color: #38bdf8;
+            border-left-color: #0ea5e9;
+        }
+        
+        body.dark .message.error {
+            background: #1f2937;
+            color: #fecaca;
+            border-left-color: #ef4444;
+        }
+        
+        body.dark .btn-secondary {
+            background: #0f172a;
+            color: #e5e7eb;
+            border-color: #1f2937;
+        }
+        
+        body.dark .btn-secondary:hover:not(:disabled) {
+            background: #020617;
+            border-color: #e5e7eb;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+                border-radius: 16px;
+                max-height: 95vh;
+            }
+            
+            .header {
+                padding: 30px 25px;
+                border-radius: 16px 16px 0 0;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 25px 20px;
+            }
+            
+            button {
+                min-height: 44px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+            <div class="icon">🚪</div>
+            <h1>Smart Door</h1>
+            <p>Visitor Entry System</p>
+        </div>
+        
+        <div class="content">
+            <div class="step-indicator">
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Photo</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Details</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Wait</div>
+                </div>
+            </div>
+            
+            <div id="cameraSection" class="section active">
+                <div class="message info show">
+                    📷 Position your face in the center and click the button below
+                </div>
+                
+                <div class="camera-container">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                </div>
+                
+                <div class="status-text">Camera ready ✓</div>
+                
+                <button class="btn-primary" onclick="capturePhoto()">
+                    <span>📸</span>
+                    <span>Capture Photo</span>
+                </button>
+            </div>
+            
+            <div id="formSection" class="section">
+                <img id="capturedPhoto" class="photo-preview" alt="Captured Photo">
+                
+                <div id="formMessage" class="message"></div>
+                
+                <form id="visitorForm" onsubmit="submitVisitorForm(event)">
+                    <div class="form-group">
+                        <label for="visitorName">
+                            Full Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="visitorName" 
+                            placeholder="e.g., John Doe" 
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visitorPhone">
+                            Phone Number <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="visitorPhone" 
+                            placeholder="e.g., 3134138327" 
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visitorEmail">
+                            Email Address (Optional)
+                        </label>
+                        <input 
+                            type="email" 
+                            id="visitorEmail" 
+                            placeholder="e.g., john@example.com"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visitReason">
+                            Reason for Visit (Optional)
+                        </label>
+                        <textarea 
+                            id="visitReason" 
+                            placeholder="e.g., Delivery, Meeting, Service"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="retakePhoto()">
+                            <span>←</span>
+                            <span>Retake</span>
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <span>📧</span>
+                            <span>Submit</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="redirectSection" class="section">
+                <div class="redirect-container">
+                    <div class="redirect-icon">✅</div>
+                    <h2>Form Submitted!</h2>
+                    <p>Your details have been received.</p>
+                    <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">
+                        Check your phone for the OTP code.
+                    </p>
+                    <div class="countdown-timer">
+                        Redirecting in <span id="redirectCountdown">3</span> seconds...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Smart Door Entry System © 2025
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://uts9856241.execute-api.us-east-1.amazonaws.com/prod';
+        let capturedPhotoBase64 = null;
+        let currentFaceId = null;
+        
+        function normalizePhone(phone) {
+            console.log('📱 Original phone:', phone);
+            phone = phone.replace(/[\s\-()]/g, '');
+            
+            if (!phone.startsWith('+')) {
+                if (phone.startsWith('1') && phone.length === 11) {
+                    phone = '+' + phone;
+                } else if (phone.length === 10) {
+                    phone = '+1' + phone;
+                } else {
+                    phone = '+1' + phone;
+                }
+            }
+            
+            console.log('📱 Normalized phone:', phone);
+            return phone;
+        }
+        
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'user', 
+                        width: { ideal: 640 }, 
+                        height: { ideal: 480 } 
+                    }
+                });
+                
+                document.getElementById('cameraVideo').srcObject = stream;
+                console.log('✅ Camera initialized');
+            } catch (error) {
+                console.error('❌ Camera error:', error);
+                showMessage('❌ Camera permission denied. Please allow camera access.', 'error', 'cameraSection');
+            }
+        }
+        
+        async function capturePhoto() {
+            try {
+                console.log('📸 Capturing photo...');
+                
+                const video = document.getElementById('cameraVideo');
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.9);
+                currentFaceId = `camera-${Date.now()}`;
+                
+                document.getElementById('capturedPhoto').src = capturedPhotoBase64;
+                document.getElementById('capturedPhoto').style.display = 'block';
+                
+                switchSection('formSection');
+                updateSteps(2);
+                
+                const stream = video.srcObject;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                console.log('✅ Photo captured:', currentFaceId);
+                
+            } catch (error) {
+                console.error('❌ Capture error:', error);
+                showMessage('❌ Failed to capture photo', 'error', 'cameraSection');
+            }
+        }
+        
+        function retakePhoto() {
+            console.log('🔄 Retaking photo...');
+            switchSection('cameraSection');
+            updateSteps(1);
+            capturedPhotoBase64 = null;
+            currentFaceId = null;
+            document.getElementById('capturedPhoto').style.display = 'none';
+            initCamera();
+        }
+        
+        async function submitVisitorForm(event) {
+            event.preventDefault();
+            
+            try {
+                const visitorName = document.getElementById('visitorName').value.trim();
+                let visitorPhone = document.getElementById('visitorPhone').value.trim();
+                const visitorEmail = document.getElementById('visitorEmail').value.trim();
+                const visitReason = document.getElementById('visitReason').value.trim();
+                
+                if (!visitorName || !visitorPhone) {
+                    showMessage('❌ Please fill in required fields', 'error', 'formSection');
+                    return;
+                }
+                
+                visitorPhone = normalizePhone(visitorPhone);
+                
+                const submitBtn = document.querySelector('#visitorForm button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loader"></span><span>Submitting...</span>';
+                
+                console.log('📤 Submitting form...');
+                console.log('   FaceID:', currentFaceId);
+                console.log('   Name:', visitorName);
+                console.log('   Phone:', visitorPhone);
+                
+                const response = await fetch(`${API_URL}/submit-visitor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        faceId: currentFaceId,
+                        photo: capturedPhotoBase64,
+                        visitorName: visitorName,
+                        visitorPhone: visitorPhone,
+                        visitorEmail: visitorEmail,
+                        visitReason: visitReason
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('✅ Response:', data);
+                
+                if (data.success) {
+                    console.log('✅ Form submitted successfully!');
+                    console.log('   OTP:', data.data.otp);
+                    
+                    sessionStorage.setItem('otp', data.data.otp);
+                    sessionStorage.setItem('faceId', currentFaceId);
+                    sessionStorage.setItem('visitorPhone', visitorPhone);
+                    
+                    console.log('💾 Stored in session:');
+                    console.log('   OTP:', sessionStorage.getItem('otp'));
+                    console.log('   FaceID:', sessionStorage.getItem('faceId'));
+                    console.log('   Phone:', sessionStorage.getItem('visitorPhone'));
+                    
+                    updateSteps(3);
+                    switchSection('redirectSection');
+                    startRedirectCountdown();
+                    
+                } else {
+                    console.error('❌ Submission failed:', data.message);
+                    showMessage(`❌ ${data.message || 'Error submitting'}`, 'error', 'formSection');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>📧</span><span>Submit</span>';
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showMessage('❌ Error submitting form', 'error', 'formSection');
+                const submitBtn = document.querySelector('#visitorForm button[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>📧</span><span>Submit</span>';
+            }
+        }
+        
+        function startRedirectCountdown() {
+            let count = 3;
+            const countdownEl = document.getElementById('redirectCountdown');
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                countdownEl.textContent = count;
+                
+                if (count === 0) {
+                    clearInterval(countdownInterval);
+                    console.log('🔄 Redirecting to wp2.html...');
+                    window.location.href = `wp2.html?faceId=${currentFaceId}`;
+                }
+            }, 1000);
+        }
+        
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        function updateSteps(stepNum) {
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                
+                if (index < stepNum - 1) {
+                    step.classList.add('completed');
+                    step.querySelector('.step-number').textContent = '✓';
+                } else if (index === stepNum - 1) {
+                    step.classList.add('active');
+                }
+            });
+        }
+        
+        function showMessage(message, type, sectionId) {
+            const messageEl = document.querySelector(`#${sectionId} .message`);
+            if (messageEl) {
+                messageEl.textContent = message;
+                messageEl.className = `message ${type} show`;
+            }
+        }
+
+        /* THEME HELPERS (shared across pages) */
+        function applyThemeFromStorage() {
+            const saved = localStorage.getItem('smartdoor-theme') || 'light';
+            if (saved === 'dark') {
+                document.body.classList.add('dark');
+            }
+            updateThemeToggleLabel();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const mode = document.body.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('smartdoor-theme', mode);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            const isDark = document.body.classList.contains('dark');
+            btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+        }
+        
+        window.addEventListener('load', () => {
+            applyThemeFromStorage();
+            initCamera();
+        });
+    </script>
+</body>
+</html>
