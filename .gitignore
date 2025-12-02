@@ -1,0 +1,20 @@
+# Python venv
+.venv/
+venv/
+
+# Mac OS
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE configs
+.vscode/
+.idea/
+
+# Local env / secrets
+.env
+
+# Local test images (optional)
+test-face.jpg
