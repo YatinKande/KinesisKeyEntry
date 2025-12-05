@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Door - OTP Verification</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -150px;
+            right: -150px;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(15, 23, 42, 0.35);
+            color: #e5e7eb;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+        
+        .subtext {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .otp-section {
+            margin-bottom: 30px;
+        }
+        
+        .otp-label {
+            display: block;
+            text-align: center;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .otp-inputs {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+        
+        .otp-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+        }
+        
+        .otp-input::placeholder {
+            color: #cbd5f5;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #d1d5db;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.45);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loader {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .result-screen {
+            text-align: center;
+            padding: 20px 10px;
+        }
+        
+        .result-icon {
+            font-size: 70px;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease-out;
+        }
+        
+        @keyframes bounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .result-title {
+            font-size: 28px;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .result-text {
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        .visitor-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+        
+        .visitor-name.success {
+            color: #10b981;
+        }
+        
+        .visitor-name.denied {
+            color: #ef4444;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            padding: 0 0 20px 0;
+        }
+
+        /* DARK THEME */
+        body.dark {
+            background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #020617 100%);
+        }
+
+        body.dark .container {
+            background: #020617;
+            box-shadow: 0 22px 60px rgba(0,0,0,0.75);
+        }
+
+        body.dark .header {
+            background: linear-gradient(135deg, #020617 0%, #1f2937 100%);
+        }
+
+        body.dark .otp-input {
+            background: #020617;
+            border-color: #1f2937;
+            color: #e5e7eb;
+        }
+
+        body.dark .otp-label,
+        body.dark .result-title,
+        body.dark .result-text,
+        body.dark .visitor-name {
+            color: #e5e7eb;
+        }
+
+        body.dark .btn-secondary {
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #1f2937;
+        }
+
+        body.dark .message.error {
+            background: #1f2937;
+            color: #fecaca;
+            border-left-color: #ef4444;
+        }
+        
+        @media (max-width: 480px) {
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .otp-inputs {
+                gap: 8px;
+            }
+            
+            .otp-input {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+            
+            button {
+                min-height: 44px;
+                font-size: 14px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+            <div class="icon">🔐</div>
+            <h1>Enter OTP</h1>
+            <p>Owner has approved your visit</p>
+            <p class="subtext">Enter the 6-digit OTP code sent to your phone</p>
+        </div>
+        
+        <div class="content">
+            <!-- OTP ENTRY SCREEN -->
+            <div id="otpScreen" class="screen active">
+                <div id="messageContainer"></div>
+                
+                <div class="otp-section">
+                    <div class="otp-label">Enter 6-digit OTP</div>
+                    <div class="otp-inputs">
+                        <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goBack()">
+                        <span>←</span><span>Back</span>
+                    </button>
+                    <button class="btn-primary" id="verifyBtn" onclick="verifyOtp()">
+                        <span>✓</span><span>Verify OTP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUCCESS SCREEN -->
+            <div id="successScreen" class="screen">
+                <div class="result-screen">
+                    <div class="result-icon">✅</div>
+                    <div class="result-title">Access Granted!</div>
+                    <p class="result-text">
+                        The Smart Door has authenticated your visit successfully.
+                    </p>
+                    <p class="result-text">
+                        Door unlocked. Please enter within the allowed time window.
+                    </p>
+                    <div id="successVisitorName" class="visitor-name success">
+                        Guest
+                    </div>
+                </div>
+            </div>
+
+            <!-- DENIED / REJECTED SCREEN -->
+            <div id="deniedScreen" class="screen">
+                <div class="result-screen">
+                    <div class="result-icon">🚫</div>
+                    <div class="result-title">Access Denied</div>
+                    <p class="result-text" id="deniedReason">
+                        Your visit request was rejected by the owner.
+                    </p>
+                    <div id="deniedVisitorName" class="visitor-name denied">
+                        Guest
+                    </div>
+                    <p class="result-text" style="margin-top: 10px; font-size: 14px;">
+                        If you believe this is a mistake, please contact the homeowner.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Smart Door Entry System © 2025
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://uts9856241.execute-api.us-east-1.amazonaws.com/prod';
+
+        // values saved from wp0.html
+        const storedPhone = sessionStorage.getItem('visitorPhone');
+        const storedOtp   = sessionStorage.getItem('otp');
+        const storedFaceId = new URLSearchParams(window.location.search).get('faceId') || sessionStorage.getItem('faceId');
+
+        console.log('🔐 wp2.html loaded');
+        console.log('   phone:', storedPhone);
+        console.log('   otp (from session):', storedOtp);
+        console.log('   faceId:', storedFaceId);
+
+        function normalizePhone(phone) {
+            if (!phone) return '';
+            phone = phone.replace(/[\s\-()]/g, '');
+            if (!phone.startsWith('+')) {
+                if (phone.startsWith('1') && phone.length === 11) {
+                    phone = '+' + phone;
+                } else if (phone.length === 10) {
+                    phone = '+1' + phone;
+                } else {
+                    phone = '+1' + phone;
+                }
+            }
+            return phone;
+        }
+
+        function setupOtpInputs() {
+            const inputs = document.querySelectorAll('.otp-input');
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', function () {
+                    if (this.value && /^\d+$/.test(this.value)) {
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    } else {
+                        this.value = '';
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+
+            if (inputs[0]) {
+                inputs[0].focus();
+            }
+        }
+
+        async function verifyOtp() {
+            try {
+                const inputs = document.querySelectorAll('.otp-input');
+                const enteredOtp = Array.from(inputs).map(i => i.value).join('');
+                
+                let phone = storedPhone;
+                phone = normalizePhone(phone);
+
+                if (enteredOtp.length !== 6) {
+                    showMessage('❌ Please enter all 6 digits', 'error');
+                    return;
+                }
+
+                if (!phone) {
+                    showMessage('❌ Phone not found. Go back and retry.', 'error');
+                    return;
+                }
+
+                const verifyBtn = document.getElementById('verifyBtn');
+                verifyBtn.disabled = true;
+                verifyBtn.innerHTML = '<span class="loader"></span><span>Verifying...</span>';
+
+                console.log('📤 Sending verify request:', { otp: enteredOtp, phone, faceId: storedFaceId });
+
+                const response = await fetch(`${API_URL}/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        otp: enteredOtp,
+                        phone: phone,
+                        faceId: storedFaceId
+                    })
+                });
+
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = {};
+                }
+
+                console.log('🔁 verify-otp status:', response.status);
+                console.log('🔁 verify-otp body:', data);
+
+                const errorCode = data.data && data.data.errorCode;
+                const statusFromData = data.data && data.data.status;
+
+                // ✅ OTP OK & visitor approved
+                if (response.ok && data.success && (statusFromData === 'approved' || !statusFromData)) {
+                    const name = (data.data && (data.data.visitorName || data.data.name)) || data.name || 'Guest';
+                    document.getElementById('successVisitorName').textContent = name;
+                    switchScreen('successScreen');
+                    return;
+                }
+
+                // 🚫 Visit was explicitly rejected
+                if (errorCode === 'VISIT_REJECTED' || statusFromData === 'rejected') {
+                    const name = (data.data && (data.data.visitorName || data.data.name)) || 'Guest';
+                    document.getElementById('deniedVisitorName').textContent = name;
+                    document.getElementById('deniedReason').textContent =
+                        data.message || 'Your visit request was rejected by the owner.';
+                    switchScreen('deniedScreen');
+                    return;
+                }
+
+                // Other errors: wrong/expired OTP, etc.
+                showMessage(`❌ ${data.message || 'Invalid or expired OTP'}`, 'error');
+                inputs.forEach(i => i.value = '');
+                if (inputs[0]) inputs[0].focus();
+
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<span>✓</span><span>Verify OTP</span>';
+            } catch (err) {
+                console.error('❌ Error verifying OTP:', err);
+                showMessage('❌ Error verifying OTP. Please try again.', 'error');
+                const verifyBtn = document.getElementById('verifyBtn');
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<span>✓</span><span>Verify OTP</span>';
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            if (type === 'error') {
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        /* THEME HELPERS */
+        function applyThemeFromStorage() {
+            const saved = localStorage.getItem('smartdoor-theme') || 'light';
+            if (saved === 'dark') {
+                document.body.classList.add('dark');
+            }
+            updateThemeToggleLabel();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const mode = document.body.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('smartdoor-theme', mode);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            const isDark = document.body.classList.contains('dark');
+            btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+        }
+        
+        window.addEventListener('load', () => {
+            applyThemeFromStorage();
+            setupOtpInputs();
+        });
+
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && document.getElementById('otpScreen').classList.contains('active')) {
+                verifyOtp();
+            }
+        });
+    </script>
+</body>
+</html>
