@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Door - Owner Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e293b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header-main h1 {
+            font-size: 28px;
+            color: #1e293b;
+        }
+        
+        .header-main p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            background: #f1f5f9;
+            color: #1f2937;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .theme-toggle:hover {
+            background: #e2e8f0;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #dc2626;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* VISITOR CARD STYLES */
+        .visitor-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        .visitor-photo {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+        
+        .visitor-info {
+            padding: 30px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-row:last-of-type {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: right;
+            word-break: break-word;
+            max-width: 60%;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .otp-display {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0284c7;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .otp-display p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .otp-code {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0284c7;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 6px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-approve {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-approve:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-reject {
+            background: #f1f5f9;
+            color: #ef4444;
+            border: 2px solid #fee2e2;
+        }
+        
+        .btn-reject:hover:not(:disabled) {
+            background: #fee2e2;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h2 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .empty-state p {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        /* TABLE STYLES FOR APPROVED GUESTS */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        th {
+            padding: 18px 20px;
+            text-align: left;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+        }
+        
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        td {
+            padding: 18px 20px;
+            font-size: 14px;
+            color: #1e293b;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-block;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-block;
+        }
+        
+        .table-header-title {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* DARK THEME OVERRIDES */
+        body.dark {
+            background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #020617 100%);
+            color: #e5e7eb;
+        }
+        
+        body.dark .header {
+            background: #020617;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        body.dark .header-main h1 {
+            color: #e5e7eb;
+        }
+
+        body.dark .header-main p {
+            color: #9ca3af;
+        }
+
+        body.dark .tabs,
+        body.dark .visitor-card,
+        body.dark .empty-state,
+        body.dark .table-container {
+            background: #020617;
+            box-shadow: 0 14px 40px rgba(0,0,0,0.7);
+        }
+
+        body.dark .tab-btn {
+            background: #020617;
+            border-color: #1f2937;
+            color: #9ca3af;
+        }
+
+        body.dark .tab-btn.active {
+            background: linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%);
+        }
+
+        body.dark .info-value,
+        body.dark .info-label {
+            color: #e5e7eb;
+        }
+
+        body.dark .otp-display {
+            background: #011529;
+            border-color: #0369a1;
+        }
+
+        body.dark td,
+        body.dark th {
+            color: #e5e7eb;
+        }
+
+        body.dark tbody tr:hover {
+            background: #020617;
+        }
+
+        body.dark .theme-toggle {
+            background: #020617;
+            border-color: #1f2937;
+            color: #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-main h1 {
+                font-size: 24px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .info-value {
+                text-align: left;
+                max-width: 100%;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                min-width: 150px;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-main">
+                <h1>🚪 Smart Door</h1>
+                <p>Owner Dashboard</p>
+            </div>
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+                <button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+        
+        <!-- TAB NAVIGATION -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('pending')">
+                ⏳ Pending Approval
+            </button>
+            <button class="tab-btn" onclick="switchTab('approved')">
+                ✅ Accepted Guests
+            </button>
+        </div>
+        
+        <div id="messageContainer"></div>
+        
+        <!-- PENDING VISITORS TAB -->
+        <div id="pending" class="tab-content active">
+            <div id="pendingContainer"></div>
+        </div>
+        
+        <!-- APPROVED VISITORS TAB - BEAUTIFUL TABLE -->
+        <div id="approved" class="tab-content">
+            <div id="approvedContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://uts9856241.execute-api.us-east-1.amazonaws.com/prod';
+        const PHOTO_BUCKET = 'smartdoor-visitor-photos-yk-2025';
+        const PHOTO_REGION = 'us-east-1';
+
+        function getVisitorPhotoUrl(visitor) {
+            if (visitor.photoUrl) return visitor.photoUrl;
+            if (visitor.photoS3Key) {
+                return `https://${PHOTO_BUCKET}.s3.${PHOTO_REGION}.amazonaws.com/${visitor.photoS3Key}`;
+            }
+            if (visitor.photoKey) {
+                return `https://${PHOTO_BUCKET}.s3.${PHOTO_REGION}.amazonaws.com/${visitor.photoKey}`;
+            }
+            return '';
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'pending') {
+                loadPendingVisitors();
+            } else {
+                loadApprovedVisitors();
+            }
+        }
+        
+        async function loadAllData() {
+            await loadPendingVisitors();
+            await loadApprovedVisitors();
+        }
+        
+        async function loadPendingVisitors() {
+            try {
+                console.log('📋 Loading pending visitors...');
+                
+                const refreshBtn = document.getElementById('refreshBtn');
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<span class="loader"></span>Loading...';
+                
+                const response = await fetch(`${API_URL}/pending-visitors`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                console.log('✅ Response:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Error loading visitors');
+                }
+                
+                const container = document.getElementById('pendingContainer');
+                
+                if (!data.data || !data.data.visitors || data.data.visitors.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h2>No Pending Visitors</h2>
+                            <p>All visitors have been reviewed. You're all caught up!</p>
+                        </div>
+                    `;
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '🔄 Refresh';
+                    return;
+                }
+                
+                const pendingVisitors = data.data.visitors.filter(v => v.status === 'pending');
+                
+                if (pendingVisitors.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h2>No Pending Visitors</h2>
+                            <p>All visitors have been reviewed. You're all caught up!</p>
+                        </div>
+                    `;
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '🔄 Refresh';
+                    return;
+                }
+                
+                container.innerHTML = pendingVisitors.map(visitor => {
+                    const photoUrl = getVisitorPhotoUrl(visitor);
+                    return `
+                    <div class="visitor-card">
+                        <img src="${photoUrl}" alt="Visitor Photo" class="visitor-photo"
+                             onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23999%22%3EPhoto Not Available%3C/text%3E%3C/svg%3E'">
+                        
+                        <div class="visitor-info">
+                            <div class="info-row">
+                                <span class="info-label">👤 Full Name</span>
+                                <span class="info-value">${visitor.visitorName || 'N/A'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">📱 Phone</span>
+                                <span class="info-value">${visitor.visitorPhone || 'N/A'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">📧 Email</span>
+                                <span class="info-value">${visitor.visitorEmail || 'Not provided'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">🎯 Visit Reason</span>
+                                <span class="info-value">${visitor.visitReason || 'Not specified'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">📍 Face ID</span>
+                                <span class="info-value" style="font-family: monospace; font-size: 13px;">${visitor.faceId || 'N/A'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">⏰ Arrival Time</span>
+                                <span class="info-value">${visitor.createdAtFormatted || 'N/A'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">📋 Status</span>
+                                <span class="badge badge-pending">🔄 Pending Approval</span>
+                            </div>
+                            
+                            <div class="otp-display">
+                                <p>🔐 Share this OTP with the visitor:</p>
+                                <div class="otp-code">${visitor.otp || '------'}</div>
+                            </div>
+                            
+                            <div class="actions">
+                                <button class="btn-approve" onclick="approveVisitor('${visitor.faceId}', '${visitor.otp}', '${visitor.visitorPhone}')">
+                                    ✓ Approve Entry
+                                </button>
+                                <button class="btn-reject" onclick="rejectVisitor('${visitor.faceId}', '${visitor.visitorPhone}')">
+                                    ✗ Reject Entry
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '🔄 Refresh';
+                
+            } catch (error) {
+                console.error('❌ Error loading visitors:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+                
+                const refreshBtn = document.getElementById('refreshBtn');
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '🔄 Refresh';
+            }
+        }
+        
+        async function loadApprovedVisitors() {
+            try {
+                console.log('✅ Loading approved/rejected visitors...');
+                
+                const response = await fetch(`${API_URL}/pending-visitors`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                console.log('✅ All visitors Response:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Error loading visitors');
+                }
+                
+                const container = document.getElementById('approvedContainer');
+                
+                if (!data.data || !data.data.visitors) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h2>No Guests Yet</h2>
+                            <p>Approved and rejected visitors will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const processedVisitors = data.data.visitors.filter(v => v.status === 'approved' || v.status === 'rejected');
+                
+                if (processedVisitors.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h2>No Guests Yet</h2>
+                            <p>Approved and rejected visitors will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const tableHTML = `
+                    <div class="table-container">
+                        <div class="table-header-title">📊 Guest History - All Decisions</div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>👤 Guest Name</th>
+                                        <th>📱 Phone</th>
+                                        <th>📧 Email</th>
+                                        <th>🎯 Visit Reason</th>
+                                        <th>📋 Decision</th>
+                                        <th>⏰ Arrival Time</th>
+                                        <th>🕐 Decision Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${processedVisitors.map(visitor => `
+                                        <tr>
+                                            <td><strong>${visitor.visitorName || 'N/A'}</strong></td>
+                                            <td>${visitor.visitorPhone || 'N/A'}</td>
+                                            <td>${visitor.visitorEmail || 'N/A'}</td>
+                                            <td>${visitor.visitReason || 'Not specified'}</td>
+                                            <td>
+                                                ${visitor.status === 'approved' 
+                                                    ? '<span class="status-approved">✅ Approved</span>' 
+                                                    : '<span class="status-rejected">❌ Rejected</span>'
+                                                }
+                                            </td>
+                                            <td>${visitor.createdAtFormatted || 'N/A'}</td>
+                                            <td>${visitor.updatedAt ? new Date(visitor.updatedAt * 1000).toLocaleString() : 'N/A'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = tableHTML;
+                
+            } catch (error) {
+                console.error('❌ Error loading visitors:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function approveVisitor(faceId, otp, phone) {
+            try {
+                console.log('✅ Approving visitor:', faceId);
+                
+                const response = await fetch(`${API_URL}/approve-visitor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        faceId: faceId,
+                        action: 'approve',
+                        otp: otp,
+                        visitorPhone: phone
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                if (data.success) {
+                    showMessage('✅ Visitor approved! SMS notification sent.', 'success');
+                    setTimeout(loadAllData, 2000);
+                } else {
+                    showMessage(`❌ ${data.message || 'Error approving visitor'}`, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function rejectVisitor(faceId, phone) {
+            if (!confirm('Are you sure you want to REJECT this visitor? They will receive a rejection notification.')) {
+                return;
+            }
+            
+            try {
+                console.log('❌ Rejecting visitor:', faceId);
+                
+                const response = await fetch(`${API_URL}/approve-visitor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        faceId: faceId,
+                        action: 'reject',
+                        visitorPhone: phone
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                if (data.success) {
+                    showMessage('✅ Visitor rejected. Rejection notification sent via SMS.', 'success');
+                    setTimeout(loadAllData, 2000);
+                } else {
+                    showMessage(`❌ ${data.message || 'Error rejecting visitor'}`, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        /* THEME HELPERS */
+        function applyThemeFromStorage() {
+            const saved = localStorage.getItem('smartdoor-theme') || 'light';
+            if (saved === 'dark') {
+                document.body.classList.add('dark');
+            }
+            updateThemeToggleLabel();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const mode = document.body.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('smartdoor-theme', mode);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            const isDark = document.body.classList.contains('dark');
+            btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+        }
+        
+        window.addEventListener('load', () => {
+            applyThemeFromStorage();
+            loadAllData();
+        });
+
+        // keep auto-refresh
+        setInterval(loadAllData, 5000);
+    </script>
+</body>
+</html>
