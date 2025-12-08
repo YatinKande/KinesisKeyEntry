@@ -1,0 +1,27 @@
+{
+    "Name": "smartdoor-stream-processor",
+    "StreamProcessorArn": "arn:aws:rekognition:us-east-1:317587885753:streamprocessor/smartdoor-stream-processor",
+    "Status": "RUNNING",
+    "CreationTimestamp": "2025-11-21T12:57:56.652000-05:00",
+    "LastUpdateTimestamp": "2025-11-21T12:58:17.213000-05:00",
+    "Input": {
+        "KinesisVideoStream": {
+            "Arn": "arn:aws:kinesisvideo:us-east-1:317587885753:stream/smartdoor-kvs/1763591980003"
+        }
+    },
+    "Output": {
+        "KinesisDataStream": {
+            "Arn": "arn:aws:kinesis:us-east-1:317587885753:stream/smartdoor-kds"
+        }
+    },
+    "RoleArn": "arn:aws:iam::317587885753:role/RekognitionStreamProcessorRole",
+    "Settings": {
+        "FaceSearch": {
+            "CollectionId": "visitor_faces",
+            "FaceMatchThreshold": 80.0
+        }
+    },
+    "DataSharingPreference": {
+        "OptIn": true
+    }
+}
