@@ -1,0 +1,21 @@
+{
+    "StreamDescriptionSummary": {
+        "StreamName": "smartdoor-kds",
+        "StreamARN": "arn:aws:kinesis:us-east-1:317587885753:stream/smartdoor-kds",
+        "StreamStatus": "ACTIVE",
+        "StreamModeDetails": {
+            "StreamMode": "ON_DEMAND"
+        },
+        "RetentionPeriodHours": 24,
+        "StreamCreationTimestamp": "2025-11-21T12:43:06-05:00",
+        "EnhancedMonitoring": [
+            {
+                "ShardLevelMetrics": []
+            }
+        ],
+        "EncryptionType": "NONE",
+        "OpenShardCount": 4,
+        "ConsumerCount": 0,
+        "MaxRecordSizeInKiB": 1024
+    }
+}

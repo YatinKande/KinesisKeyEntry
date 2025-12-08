@@ -1,0 +1,58 @@
+{
+    "StreamDescription": {
+        "Shards": [
+            {
+                "ShardId": "shardId-000000000000",
+                "HashKeyRange": {
+                    "StartingHashKey": "0",
+                    "EndingHashKey": "85070591730234615865843651857942052863"
+                },
+                "SequenceNumberRange": {
+                    "StartingSequenceNumber": "49669183260709405429051002550251838301420482399167315970"
+                }
+            },
+            {
+                "ShardId": "shardId-000000000001",
+                "HashKeyRange": {
+                    "StartingHashKey": "85070591730234615865843651857942052864",
+                    "EndingHashKey": "170141183460469231731687303715884105727"
+                },
+                "SequenceNumberRange": {
+                    "StartingSequenceNumber": "49669183260731706174249533173393374019693130760673296402"
+                }
+            },
+            {
+                "ShardId": "shardId-000000000002",
+                "HashKeyRange": {
+                    "StartingHashKey": "170141183460469231731687303715884105728",
+                    "EndingHashKey": "255211775190703847597530955573826158591"
+                },
+                "SequenceNumberRange": {
+                    "StartingSequenceNumber": "49669183260754006919448063796534909737965779122179276834"
+                }
+            },
+            {
+                "ShardId": "shardId-000000000003",
+                "HashKeyRange": {
+                    "StartingHashKey": "255211775190703847597530955573826158592",
+                    "EndingHashKey": "340282366920938463463374607431768211455"
+                },
+                "SequenceNumberRange": {
+                    "StartingSequenceNumber": "49669183260776307664646594419676445456238427483685257266"
+                }
+            }
+        ],
+        "StreamARN": "arn:aws:kinesis:us-east-1:317587885753:stream/smartdoor-kds",
+        "StreamName": "smartdoor-kds",
+        "StreamStatus": "ACTIVE",
+        "RetentionPeriodHours": 24,
+        "EnhancedMonitoring": [
+            {
+                "ShardLevelMetrics": []
+            }
+        ],
+        "EncryptionType": "NONE",
+        "KeyId": null,
+        "StreamCreationTimestamp": "2025-11-21T12:43:06-05:00"
+    }
+}
