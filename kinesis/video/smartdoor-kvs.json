@@ -1,0 +1,11 @@
+{
+    "StreamInfo": {
+        "StreamName": "smartdoor-kvs",
+        "StreamARN": "arn:aws:kinesisvideo:us-east-1:317587885753:stream/smartdoor-kvs/1763591980003",
+        "KmsKeyId": "arn:aws:kms:us-east-1:317587885753:alias/aws/kinesisvideo",
+        "Version": "zifRwxIBtbkI2qTAuDpb",
+        "Status": "ACTIVE",
+        "CreationTime": "2025-11-19T17:39:40.003000-05:00",
+        "DataRetentionInHours": 24
+    }
+}
