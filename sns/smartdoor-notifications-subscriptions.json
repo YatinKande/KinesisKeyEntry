@@ -1,0 +1,11 @@
+{
+    "Subscriptions": [
+        {
+            "SubscriptionArn": "arn:aws:sns:us-east-1:317587885753:smartdoor-notifications:dbdd33f0-bbe6-49f8-b1fa-0e60636227e4",
+            "Owner": "317587885753",
+            "Protocol": "email",
+            "Endpoint": "yatinrags135@gmail.com",
+            "TopicArn": "arn:aws:sns:us-east-1:317587885753:smartdoor-notifications"
+        }
+    ]
+}
