@@ -1,0 +1,41 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "faceId",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "visitors",
+        "KeySchema": [
+            {
+                "AttributeName": "faceId",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2025-11-19T15:03:15.387000-05:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 0,
+            "WriteCapacityUnits": 0
+        },
+        "TableSizeBytes": 3817,
+        "ItemCount": 13,
+        "TableArn": "arn:aws:dynamodb:us-east-1:317587885753:table/visitors",
+        "TableId": "ed52a059-2c32-452b-85dc-8d82e2a73b45",
+        "BillingModeSummary": {
+            "BillingMode": "PAY_PER_REQUEST",
+            "LastUpdateToPayPerRequestDateTime": "2025-11-19T15:03:15.387000-05:00"
+        },
+        "TableClassSummary": {
+            "TableClass": "STANDARD"
+        },
+        "DeletionProtectionEnabled": false,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 12000,
+            "WriteUnitsPerSecond": 4000,
+            "Status": "ACTIVE"
+        }
+    }
+}
